@@ -66,7 +66,6 @@ class Map:
         self.visited_map = np.zeros((2040,2040,12),np.uint8)
         self.start = start
         self.goal = goal
-        # self.step_size = step_size
         self.queue=[]
         self.visited = []
         self.shortest_path = [] 
@@ -74,9 +73,8 @@ class Map:
         self.clearence= 5
         r = self.radius
         c = self.clearence
-        # self.anim = np.zeros((10,10,3),np.uint8)
         self.fourcc = cv2.VideoWriter_fourcc(*'XVID')
-        # self.out = cv2.VideoWriter('output.avi',self.fourcc,20.0,(300,200))
+        
 
         plt.scatter(start[0],start[1],s = 10,c = 'r')
         plt.scatter(goal[0],goal[1],s = 10,c = 'r')
@@ -115,7 +113,7 @@ class Map:
         c=self.clearence
 
         obstacle = False
-        # print("Point :",x,y)
+      
         if (x<=(10+r+c)) or (x>=1020-(10+(r+c))) or (y<=(10+r+c)) or (y>=1020-(10+(r+c))):
             print("Boundary Condition")
             obstacle = True
@@ -192,36 +190,23 @@ class Map:
             # i = 4-i
 
             # # Check the states at -60, -30, 0, 30, 60
-            # xn = (x+(self.step_size*np.cos((theta+i-2)*np.pi/6)))
-            # yn = (y+(self.step_size*np.sin((theta+i-2)*np.pi/6)))
             
-            # # Edit the states -1, -2, etc to 11, 10, etc so on
-            # alpha = theta+i-2
-            # if alpha <0:
-            #     alpha = alpha +12
-            # # Edit the states 13, 14, etc to 1, 2, etc so on
-            # if alpha >11:
-            #     alpha = alpha-12
             xn,yn,thetan = plot_curve(x,y,theta,a[0],a[1])
             # Check obstacle condition for the explored nodes 
             if self.isObstacle(xn,yn) == False:
                 print("Point :",xn,yn,get_alpha(thetan))
-                # print("Alpha :",alpha)
-                # Check already visited condition for explored nodes 
-                # if (np.sum(self.visited_map[int(round(yn*2)),int(round(xn*2)),:]))==0:
+                
+                # Check already visited condition for explored node
                 if (self.visited_map[int(round(yn*2)),int(round(xn*2)),get_alpha(thetan)])==0:
                     self.visited_map[int(round(yn*2)),int(round(xn*2)),get_alpha(thetan)]=1
-                    # self.anim[int(yn),int(xn)]=[255,0,0]
-                    # plt.plot([x,xn],[y,yn],'b')
-                    # print("Append :",np.array([self.cost((xn,yn),step_cost),xn,yn,thetan,step_cost+1,a,x,y,theta ]))
+                 
                     heapq.heapify(self.queue)
                     heapq.heappush(self.queue,[self.cost((xn,yn),step_cost),xn,yn,thetan,step_cost+1,a,x,y,theta ])
 
                 elif (self.visited_map[int(round(yn*2)),int(round(xn*2)),get_alpha(thetan)])>0:
                     pass
 
-        # print("Queue :")
-        # print(np.array(self.queue))
+ 
         print("-------")
 
     def backtrack(self):
@@ -233,45 +218,37 @@ class Map:
         self.shortest_path.append([self.goal[0],self.goal[1],self.goal[2],[0,0]])
         while(True):
             popped = self.visited[n-1-j]
-            print("Popped :",popped)
+
             current_node = [popped[1],popped[2],popped[3],popped[-4]]
             parent_node = [popped[-3],popped[-2],popped[-1],popped[-4]]
-            print("Current Node :",current_node)
-            print("Parent Node :",parent_node)
+
             parent.append(parent_node)
-            # self.anim[int(parent_node[1]),int(parent_node[0])]=[0,0,255]
+           
             self.shortest_path.append([parent_node[0],parent_node[1],parent_node[2],parent_node[3]])
             if [current_node[0],current_node[1]] == [self.start[0],self.start[1]]:
                 break
-            # cv2.imshow("Anim",self.anim)
-            # self.out.write(self.anim)
-            # if cv2.waitKey(1) & 0xFF == ord('q'):
-                # break
+          
             
             # Extract the explored nodes columns of the queue
             cp = np.array(self.visited)[:,1:4]
-            # print("CP: ", np.array(cp)[9])
+          
 
             # Return the index of the parent node in the explored node columns of the queue
             for i in range(0,cp.shape[0]):
                 if (cp[i][0]==parent_node[0]) and (cp[i][1]==parent_node[1]) and (cp[i][2]==parent_node[2]):
-                    # print("Found at ",i)
+                  
                     j = n-1-i
-        # self.out.release()
-        # self.shortest_path[0] = [self.start[0],self.start[1],self.start[2]*30]
+      
         sp = np.array(self.shortest_path)
         print("Shortest Path :",sp)
-        # xn,yn = self.goal[0],self.goal[1]
+      
         for pt in self.shortest_path:
             plot_curve(pt[0],pt[1],pt[2],pt[3][0],pt[3][1],c='red')
             plt.pause(0.05)
 
         if plt.waitforbuttonpress():
             sys.exit()
-        # while True:
-        #     plt.plot(sp[:,0],sp[:,1],'r')
-        #     if plt.waitforbuttonpress():
-        #         break
+     
     def astar(self):
         """
         A Star Alorithm
@@ -288,9 +265,7 @@ class Map:
             # Check Goal Condition
             if (np.linalg.norm(np.array(current[1:3])- np.array(self.goal[0:2])) <= 5):
                 print("Goal Reached! ")
-                # print("Visited" , np.array(self.visited))
-                # cv2.imshow("Animation :",self.anim)
-                # cv2.waitKey()
+               
                  
                 # Perform backtracking
                 self.backtrack()
@@ -301,19 +276,12 @@ class Map:
             print("|________________|")  
 
             # Represent that node in the animation map
-            # self.anim[int(round(current[2])),int(round(current[1]))]= [0,255,0]
-            # cv2.imshow("Animation :",self.anim)
-            # self.out.write(self.anim)
-            
-            # if cv2.waitKey(1) & 0xFF == ord('q'):
-            #     break
-            # cv2.waitKey()
+         
+           
             plt.show()
             plt.pause(0.005)
 
-            # if plt.waitforbuttonpress():
-            #     continue
-        # self.out.release()
+          
 
 def cart2img(node):
     return([node[0]+510,node[1]+510,node[2]])
